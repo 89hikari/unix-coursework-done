@@ -1,0 +1,43 @@
+version: "3.7"
+
+services:
+
+  openproject:
+    container_name: openproject
+    build:
+      context: openproject-ce
+    ports:
+      - 5432:5432
+      - 8090:80
+
+  gitbucket:
+    container_name: gitbucket
+    build: 
+      context: gitbucket
+    ports:
+      - "8080:8080"
+      - "29418:29418"
+
+  drone-server:
+    container_name: drone-server
+    build: 
+      context: drone-server
+    ports:
+      - "9000:9000"
+      - "443:443"
+    volumes:
+      - "/drone:/var/lib/drone"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+  
+  drone-agent:
+    container_name: drone-agent
+    command: agent
+    build:
+      context: drone-agent
+    depends_on:
+      - drone-server
+    ports:
+      - "3000:3000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/local/bin/docker:/usr/local/bin/docker
